@@ -67,6 +67,13 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# MyST Markdown build output
+_build/
+
+# Paper source materials (PDF + LaTeX from MathPix) - do not commit (copyright)
+# Students create source/ inside each paper folder, e.g. models/.../{BALLPARK}/source/
+**/source/**
+
 # PyBuilder
 target/
 
@@ -112,3 +119,7 @@ env-*/
 
 # Mac
 .DS_Store
+
+# Cursor / SpecStory
+.cursor*
+.specstory*/
