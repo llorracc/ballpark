@@ -64,6 +64,152 @@ If the formalization layer has stabilized and you have working code, add a `repl
 
 ---
 
+## Machine-readable metadata (for AI indexing)
+
+Ballpark entries are designed to be discovered and cited by both humans and AI agents. The `index.md` frontmatter and an optional `AGENTS.md` provide the structured signals that make this work.
+
+### Required frontmatter fields on `index.md`
+
+```yaml
+---
+title: "<Paper title> — Ballpark Entry"
+schema_type: ScholarlyArticle              # schema.org type; Dataset also acceptable
+about:
+  doi: 10.XXXX/YYYY                        # paper DOI
+  authors: [LastName, LastName, LastName]
+  year: 2019
+  journal: American Economic Review
+keywords: [kebab-case, tags]               # free-form topical tags
+econ_ark_topic:                            # controlled vocabulary — pick from:
+  - HA-macro                               #   HA-macro, lifecycle, wealth-distribution,
+  - wealth-distribution                    #   monetary, fiscal-policy, optimal-taxation,
+  - lifecycle                              #   housing, labor, business-cycles,
+                                           #   computational-methods, open-economy,
+                                           #   liquidity-trap, demographics,
+                                           #   financial-crisis, inequality
+jel: [D31, E21, J62]                       # JEL codes (array)
+difficulty: stretch                        # good-first-ballpark | stretch | research-grade
+status: formalized                         # slideware | formalized | remark-ready | promoted
+has_formalization_layer: true              # true iff the formalization-layer files exist
+ballpark_contributor:
+  name: "<name>"
+  orcid: "0000-0000-0000-0000"             # optional but strongly encouraged
+updated_by:                                # one entry per material revision; most recent last
+  - name: "<name>"
+    orcid: "..."
+    date: 2026-01-27
+---
+```
+
+MyST renders this frontmatter as JSON-LD on the published page, which Google Scholar, LLM training pipelines, and retrieval agents recognize. The same frontmatter powers the browsable catalog's filter UI (one source of truth).
+
+### Optional frontmatter extensions (recommended)
+
+```yaml
+doi: 10.5281/zenodo.XXXXXXX                # Zenodo DOI for this ballpark entry itself
+superseded_by: https://github.com/econ-ark/REMARK/...   # once promoted
+requires: [CRRA, EGM, bequest-utility]     # model features — free-form tags
+```
+
+### `AGENTS.md` (required for items with a formalization layer; recommended otherwise)
+
+A short structured brief aimed at coding agents (Claude Code, Cursor, etc.) that a user's local session will read when the directory is opened. Distinct from the human-readable `index.md`. See the [Benhabib_et_al_2019 worked example](models/We-Would-Like-In-Econ-ARK/Benhabib_et_al_2019/AGENTS.md).
+
+Purpose:
+
+- Point agents at the **right file to read first** (the SMD-polished excerpt, not the paper PDF).
+- Surface the **Matsya session name** so new calls continue the existing thread.
+- List **known workarounds** / unresolved features so agents don't re-discover them.
+- Suggest **common next tasks** so agents proposing work have a grounded starting point.
+
+#### How to produce your `AGENTS.md`
+
+Copy the template below into `AGENTS.md` in your item directory and fill in the six sections. Every section has a grounded source in files you have already produced — you should not be inventing content.
+
+| Section | Where its content comes from |
+|---|---|
+| **Paper** | `<citekey>_intro.ipynb` — citation, DOI, one-sentence pitch of why the paper is in-ballpark. Copy verbatim; this is the one place duplication with `index.md` is intentional, because the agent may open `AGENTS.md` first. |
+| **If a user asks to work on this item** | `<citekey>_summary.ipynb` (section "The Model") is the authoritative recursive statement. `<citekey>.mmd` is the AI-friendly paper source. If your formalization layer is present, point at `bellman-excerpt-SMD-polished.md` as "read first" instead of the summary notebook. |
+| **Formalization status** | Tick which layer files you committed: `bellman-excerpt.md`, `bellman-excerpt-SMD-polished.md`, `dolo-plus-draft.yaml`, `verification.md`, `matsya-session.txt`. Be honest about what is not yet present. |
+| **Known model features requiring attention** | Pull from `verification.md` (the items you rejected or edited) and from the inline `# workaround:` / `# unresolved:` comments in `dolo-plus-draft.yaml`. This is the single most useful section for an agent — it is the list of things it should not re-discover. If the formalization layer is absent, list the model features you already know will be awkward (state-contingent shocks, mechanical deductions, non-standard normalizations, etc.). |
+| **Common next tasks** | List what you intentionally left undone. Examples from real items: *"add terminal-period stage to YAML"*, *"formalize the dynasty wrapper"*, *"add age-varying wage overrides"*. Cite the specific file or line a next-task should touch. Do **not** list tasks you would have liked to do but have no grounding for. |
+| **Workflow reminders** | Mostly boilerplate. Keep the Matsya session-naming convention (`topics2026-<slug>` for coursework), the paper-verification reminder, and the workaround-comment convention. Delete anything that does not apply to your item. |
+
+**Template** (copy and fill in):
+
+````markdown
+# Ballpark entry: <Authors> (<Year>)
+
+> Structured brief for coding agents (Claude Code, Cursor, etc.). Human-facing content lives in [`index.md`](index.md).
+
+## Paper
+
+- **Citation:** <Authors (Year), "Title," Journal vol(issue), pages>.
+- **DOI:** [<doi>](https://doi.org/<doi>)
+- **Core model:** <one-sentence description: lifecycle / HA / OLG / ..., key state and control, what's stochastic, what closes the problem>.
+- **Why in-ballpark:** <one sentence: what makes this paper interesting for Econ-ARK>.
+
+## If a user asks to work on this item
+
+1. **Read first:** <file> — <why this is authoritative>.
+2. **Paper source for AI ingestion:** `<citekey>.mmd` (Pandoc-converted). Prefer this over `<citekey>.pdf`.
+
+## Formalization status
+
+- Explicit recursive formulation: <present in `_summary.ipynb` | not yet stated>.
+- `bellman-excerpt.md`: <committed | not committed>.
+- `dolo-plus-draft.yaml`: <committed | not committed>.
+- `verification.md`: <committed | not committed>.
+- `matsya-session.txt`: <committed | not committed>.
+
+## Known model features requiring attention in a formalization pass
+
+- <feature 1>: <what's awkward and why; how you worked around it or plan to>.
+- <feature 2>: ...
+- <feature 3>: ...
+
+## Common next tasks (grounded)
+
+1. <task 1, tied to a specific file or section>.
+2. <task 2>.
+3. <task 3>.
+
+## Workflow reminders
+
+- **Matsya session:** use `topics2026-<slug>` for new work on this item.
+- **Paper verification:** Matsya output must be checked against the paper PDF (or `.mmd`), not only against the ballpark `_summary.ipynb`.
+- **When flagging workarounds in YAML:** use inline `# workaround:` or `# unresolved:` comments rather than silently fudging non-canonical syntax.
+````
+
+**AI-assisted drafting (recommended).** Once your formalization layer is present, ask a coding agent (Claude Code, Cursor) to draft `AGENTS.md` from your item's files:
+
+> Read `index.md`, `<citekey>_intro.ipynb`, `<citekey>_summary.ipynb`, `bellman-excerpt-SMD-polished.md`, `dolo-plus-draft.yaml`, and `verification.md` in this directory. Draft an `AGENTS.md` following the template in the repo-root `CONTRIBUTING.md`. Do not invent content — if a section lacks a grounded source in these files, write **TBD** for that section and explain what you would need.
+
+**Then review carefully.** Agents occasionally invent plausible-sounding "next tasks" or "workarounds" that are not grounded in your verification notes. Rewrite anything you cannot trace to a specific file. The point of `AGENTS.md` is that a later agent can trust it; that trust is wasted if you pass through hallucinations.
+
+### Repo-level artifacts (maintained centrally, not per item)
+
+- [`llms.txt`](llms.txt) at the repo root — a plain-text sitemap for LLMs following the [llmstxt.org](https://llmstxt.org) convention. Update this file when you add or rename an item.
+- `items.json` (auto-generated from frontmatter during the MyST build) — machine-readable catalog; one object per item with the full frontmatter flattened.
+- `sitemap.xml` and `atom.xml` — emitted by the MyST build.
+
+### Content-form conventions for LLM legibility
+
+- **Every committed `.ipynb` is also exported to `.md`** at build time. Reviewers and LLMs read the `.md`; the `.ipynb` remains authoritative.
+- **Paper ships as `.mmd` alongside `.pdf`** where license permits (Pandoc-converted markdown — much easier for Cursor / Claude / Matsya to ingest than PDF).
+- **Every equation carries an `:alt:` attribute** describing it in prose, for models that can't render LaTeX but can read HTML.
+- **Every figure has alt-text** (WCAG and LLM indexability are the same action).
+
+### Model structure as first-class data (stretch)
+
+For items with a committed `dolo-plus-draft.yaml`, a generated `model.json` extracts the stage(s) into a programmatic form. This lets retrieval agents answer structural queries like *"find all ballpark items with an EGM-compatible interior stage"* or *"which items have Markov-chain employment states."* The extractor is maintained centrally; contributors do not hand-write `model.json`.
+
+### AI provenance (optional)
+
+If AI tools materially shaped the formalization layer, add `ai-provenance.md` documenting which tools played which role and linking the session artifacts. This gives both credit and traceability.
+
+---
+
 ## What does **not** belong in a ballpark item
 
 - `_build/` — gitignored.
@@ -94,7 +240,7 @@ When you revise an existing item, add (do not overwrite) an **Updated by** line.
 Not every contributor will produce every layer. For a PR to be mergeable:
 
 - **Minimum:** `index.md` + `<citekey>_intro.ipynb` (with explicit provenance) + `<citekey>_summary.ipynb` with an explicit "The Model" section + `references.bib` + paper PDF or DOI pointer.
-- **Stretch (coursework-grade):** above + the full formalization layer.
+- **Stretch (coursework-grade):** above + the full formalization layer + `AGENTS.md`.
 - **REMARK-ready:** above + a working `replication/` subdir.
 
 ---
@@ -109,7 +255,7 @@ Before opening a PR, confirm:
 - [ ] Every figure the notebooks reference exists and renders.
 - [ ] Paper PDF is either committed or replaced by a DOI pointer with a license note.
 - [ ] `_intro.ipynb` carries visible **Original ballpark author** and (if applicable) **Updated by** lines.
-- [ ] If the formalization layer is included: `dolo-plus-draft.yaml` flags all unresolved features with inline `# workaround:` / `# unresolved:` comments, and `verification.md` compares Matsya output to the published paper (not only the ballpark summary).
+- [ ] If the formalization layer is included: `AGENTS.md` is present; `dolo-plus-draft.yaml` flags all unresolved features with inline `# workaround:` / `# unresolved:` comments; and `verification.md` compares Matsya output to the published paper (not only the ballpark summary).
 - [ ] No `_build/`, UUID build directories, or `.slides.html` files are committed.
 
 ---
