@@ -9,9 +9,10 @@ This file specifies what a ballpark item should contain and how to submit one. F
 ## Before you start
 
 1. **Is the paper in scope?** Ballpark items are papers that are either (a) serious structural models producing interesting quantitative results, or (b) strong empirical evidence that begs for a model. See [README.md](README.md) for the two tracks (`models/` vs `empirical/`).
-2. **Is it already here?** Check `models/We-Would-Like-In-Econ-ARK/` for an existing subdirectory under the paper's citekey. If one exists, open a PR improving it rather than creating a parallel entry.
-3. **Is it listed but not yet claimed?** If there is a subdirectory but it is thin (legacy "slideware" — one notebook of markdown + figures), your contribution can be to refactor it to the canonical structure below.
-4. **None of the above?** Open an issue naming the paper, the DOI, and the track (`models` / `empirical`), and we will confirm before you invest effort.
+2. **Has the paper been cited enough to matter?** The paper must have **at least 3 citations in Google Scholar** to be eligible as a ballpark candidate. This is a hard gate: it filters for papers whose ideas have begun to circulate in the literature, without excluding recent papers that have not yet accumulated many citations. Paste the Google Scholar citation count (as of submission date) into the submission PR description.
+3. **Is it already here?** Check `models/We-Would-Like-In-Econ-ARK/` for an existing subdirectory under the paper's citekey. If one exists, open a PR improving it rather than creating a parallel entry.
+4. **Is it listed but not yet claimed?** If there is a subdirectory but it is thin (legacy "slideware" — one notebook of markdown + figures), your contribution can be to refactor it to the canonical structure below.
+5. **None of the above?** Open a [Wanted Ballpark Paper issue](../../issues/new?template=wanted-ballpark.yml) using the provided form (citation, DOI, Google Scholar citation count, track, topic, 3-sentence pitch). We will confirm before you invest effort.
 
 ---
 
@@ -53,7 +54,7 @@ The three workaround categories you are most likely to hit are **mechanical (non
 |------|-----------|---------|
 | `<citekey>.pdf` | required | The paper. If license forbids redistribution, replace with a DOI-only pointer in `_intro.ipynb`. |
 | `<citekey>.mmd` | recommended | Pandoc-converted markdown of the paper. Much easier for Cursor / Claude / Matsya to ingest than PDF. Produce via `pandoc <citekey>.pdf -o <citekey>.mmd` or equivalent. |
-| `references.bib` | required | Bib entries cited from `_prior-literature.ipynb` and `_summary.ipynb`. |
+| `references.bib` | required | Bib entries cited from `_prior-literature.ipynb` and `_summary.ipynb`. A superset is acceptable — uncited entries (e.g., a broader reading list the contributor maintains) do not need to be pruned. MyST renders only cited entries in the published bibliography. |
 | `self.bib` | recommended | The paper's own bib entry. Keeps the paper citation separable from its context. |
 | `subsequent-literature.bib` | required if the notebook is non-empty | Bib entries cited from `_subsequent-literature.ipynb`. |
 | Figures / tables (e.g. `fig1.png`, `Table2.png`) | as needed | Use paper's own labels where possible. |
@@ -89,7 +90,7 @@ econ_ark_topic:                            # controlled vocabulary — pick from
                                            #   financial-crisis, inequality
 jel: [D31, E21, J62]                       # JEL codes (array)
 difficulty: stretch                        # good-first-ballpark | stretch | research-grade
-status: formalized                         # slideware | formalized | remark-ready | promoted
+tier: formalized                           # draft | primer | formalized — see "Ballpark tiers" below
 has_formalization_layer: true              # true iff the formalization-layer files exist
 ballpark_contributor:
   name: "<name>"
@@ -235,27 +236,142 @@ When you revise an existing item, add (do not overwrite) an **Updated by** line.
 
 ---
 
-## Minimum viable contribution
+## Ballpark tiers
 
-Not every contributor will produce every layer. For a PR to be mergeable:
+Ballpark items progress through three tiers of increasing formalization completeness — analogous in spirit to REMARK's standard/published distinction but scoped entirely to *pre-implementation* work. The ballpark's job is to land a well-specified model ready for a coder; the implementation step (working `reproduce.sh`, `CITATION.cff`, `binder/environment.yml`) happens in [REMARK](https://github.com/econ-ark/REMARK) / [DemARK](https://github.com/econ-ark/DemARK), not here.
 
-- **Minimum:** `index.md` + `<citekey>_intro.ipynb` (with explicit provenance) + `<citekey>_summary.ipynb` with an explicit "The Model" section + `references.bib` + paper PDF or DOI pointer.
-- **Stretch (coursework-grade):** above + the full formalization layer + `AGENTS.md`.
-- **REMARK-ready:** above + a working `replication/` subdir.
+Each tier is a **plateau** with a concrete, reviewable qualifying checklist. Contributors can stop at any tier indefinitely.
+
+| Tier | One-line characterization | Typical effort from the previous tier (AI-assisted, PhD-course-assignment units) |
+|------|---------------------------|----------------------------------------------------------------------------------|
+| **Draft** | Paper identified, claimed, and minimally cataloged. | **≈ 1 weekly assignment** (from zero / from a `wanted-ballpark` issue). |
+| **Primer** | A reader can understand the paper and its context without reading the paper. | **≤ 2 weekly assignments** (from Draft). |
+| **Formalized** | The model is stated in modular-DDSL form, with a dolo-plus YAML draft. | **≤ 2 weekly assignments** (from Primer). |
+
+Each name presupposes the tier below it: a *primer* is a completed introductory treatment of what a *draft* only sketches; a *formalized* specification is the rigorous re-expression of what the *primer* states informally. Rank order is unambiguous from the names alone.
+
+(A pre-tier state, **Wanted**, is an open issue labeled `wanted-ballpark` with bibliographic info. It has no directory.)
+
+### Draft
+
+*"I am claiming this paper and committing to minimal cataloging."*
+
+Qualifying checklist:
+
+- [ ] Item directory exists under `models/We-Would-Like-In-Econ-ARK/<citekey>/` (or `empirical/<citekey>/`).
+- [ ] `index.md` with required frontmatter (including `tier: draft`).
+- [ ] `<citekey>_intro.ipynb` with citation, DOI link, **Original ballpark author + date**, and a 3-sentence pitch of why the paper is in-ballpark for Econ-ARK.
+- [ ] `references.bib` (may be empty at Draft).
+- [ ] Paper committed as `<citekey>.pdf` OR replaced by a DOI pointer with a license note in `_intro.ipynb`.
+
+Draft is the minimum mergeable contribution. It converts a `wanted-ballpark` issue into a claimed directory.
+
+### Primer
+
+*"A graduate student can orient themselves around this paper without reading it."*
+
+Qualifying checklist — everything in Draft, plus:
+
+- [ ] `<citekey>_prior-literature.ipynb` situating the paper in its foundational literature, with `{cite:t}` citations resolving from `references.bib`. **Cite at least 3 and no more than 6 prior papers** — enough to establish context, few enough that the notebook stays focused.
+- [ ] `<citekey>_summary.ipynb` with (a) a non-technical motivation + findings overview, and (b) a **"The Model"** section stating the recursive formulation **explicitly**: no `u(c)` placeholders, explicit CRRA or EZ kernel, explicit bequest function (if any), explicit transitions, explicit shock distributions, explicit constraint set.
+- [ ] `<citekey>_subsequent-literature.ipynb` + `subsequent-literature.bib`. **No hard citation count is required**, since recent papers may have few subsequent citations; the notebook should cite whatever subsequent work exists (typically 0–6 papers) and note explicitly if the paper is too recent to have accumulated much. (Paper eligibility itself is gated by the Google-Scholar-≥3 rule in "Before you start.")
+- [ ] `self.bib` with the paper's own bib entry.
+- [ ] `<citekey>.mmd` (Pandoc-converted markdown of the paper) unless license forbids — this is what Cursor / Claude / Matsya read most effectively.
+- [ ] `myst.yml` configured; `myst build` completes cleanly.
+- [ ] `index.md` `{include}`s all four exposition notebooks in order.
+
+Primer is the current aspirational target for the typical legacy-slideware refactor. [`Benhabib_et_al_2019`](models/We-Would-Like-In-Econ-ARK/Benhabib_et_al_2019/) is the reference instance of this tier.
+
+### Formalized
+
+*"The model has been translated into a modular-DP specification ready for a coder."*
+
+Qualifying checklist — everything in Primer, plus:
+
+- [ ] `bellman-excerpt.md` — standalone modular-DDSL Bellman statement: **comprehensive symbol table**, timing convention, **perch decomposition**, stage operator. The two required components in detail:
+
+  - **Symbol table.** Lists **every object that appears — or might appear — in the formalized statement of the model**: states, controls, shocks, parameters, value functions, marginal-value functions, constraints, income maps, deterministic deductions, normalization factors, timing indices, type / family indices, and any other quantity referenced anywhere in the Bellman equation, transitions, or mover blocks. Each row gives the symbol, its role (state / control / shock / parameter / derived / …), its space or domain, and a one-line description. The intent is that a reader (human or agent) can read the symbol table alone and know what every subsequent symbol in the document means without hunting through prose.
+
+  - **Perch decomposition.** Required for every stage. Names the three perches — **arrival** ($\prec$), **decision** ($\circ$), **continuation** ($\succ$) — and at each perch lists the state variables carried, the value function, and (at the decision perch) the control. Then names the two within-stage transitions: $\mathrm{g}_{\prec\circ}$ (arrival-to-decision, resolving shocks + building the decision-perch state) and $\mathrm{g}_{\circ\succ}$ (decision-to-continuation, the savings or poststate identity). Then names the two movers: the backward mover $\mathbb{B}$ (continuation-to-decision, which performs the $\max$ over the control) and the forward / arrival mover $\mathbb{I}$ (decision-to-arrival, which integrates over next-period shocks). Finally states the stage operator $\mathbb{T} = \mathbb{I} \circ \mathbb{B}$.
+
+    **Stub or degenerate perches are fine** and should be explicitly labeled as such. A perch can be degenerate in several natural ways: an arrival mover $\mathbb{I}$ can collapse to the identity when there are no within-period shocks (as in Benhabib et al. 2019); an arrival-to-decision transition can be degenerate when the decision-perch state is carried unchanged from the arrival perch; a continuation perch can be a stub when the stage has no intertemporal linkage (rare, but allowed). What is **not** acceptable is omitting a perch, a transition, or a mover from the decomposition because it happens to be trivial — a reviewer must be able to tell "this is an identity" from "this was forgotten."
+- [ ] `bellman-excerpt-SMD-polished.md` — post-Matsya SMD-aligned revision with perch table and EGM channel discussion.
+- [ ] `dolo-plus-draft.yaml` — one-stage YAML (interior period sufficient); all unresolved features flagged with inline `# workaround:` or `# unresolved:` comments.
+- [ ] `verification.md` — one paragraph stating what was accepted / edited / rejected from Matsya's output, compared against the published paper (not only the `_summary.ipynb`).
+- [ ] `matsya-session.txt` — the `--session` string used, if AI-assisted; or a file containing `N/A — hand-written` otherwise.
+- [ ] **`AGENTS.md` — required at Formalized.** See the section above for how to produce it.
+
+Formalized is the ballpark's top tier. A *Formalized* item is ready to be picked up by a coder (human or agent) and promoted to REMARK or DemARK — the implementation work happens there, not here.
+
+### Beyond Formalized: promotion out of the ballpark
+
+Once a Formalized item has working code reproducing paper results, it is eligible for promotion to [REMARK](https://github.com/econ-ark/REMARK) (for substantial replications) or [DemARK](https://github.com/econ-ark/DemARK) (for demonstrations). REMARK itself has a tiering (*standard* vs. *published*-with-DOI); those criteria are documented at the REMARK repo and are not this repository's concern.
+
+When an item is promoted, add a **Superseded by** pointer in `_intro.ipynb` rather than deleting the ballpark entry — the entry retains historical and pedagogical interest.
+
+### Promotion mechanics within the ballpark
+
+- Each tier is a plateau; indefinite residence is fine.
+- A **promotion PR** adds the next tier's files and updates `tier:` in the frontmatter.
+- PR title pattern: `Promote <citekey> to Primer` / `Promote <citekey> to Formalized`.
+- The PR body quotes the qualifying checklist for the target tier and ticks each box with a file-line citation.
+- **Tier regression** (e.g. Formalized → Primer) is allowed when an item's formalization is found to be incorrect and is being withdrawn for revision; it should be rare and the PR must explain the defect.
+
+### Review policy
+
+Review requirements depend on the target tier.
+
+- **Draft and Primer: self-serve.** The contributor opens the PR, ticks the target tier's qualifying checklist in the PR body with file-line citations, and merges once the **automated checks** (see below) pass. No designated reviewer is required at these tiers because the qualifying criteria are mechanically checkable.
+
+- **Formalized: automated gate, then designated human reviewer.** The contributor opens the PR the same way, but:
+
+  1. **Automated rigorous check runs first.** CI runs the full Formalized checklist as executable checks (file-existence, YAML validity, MyST build, bib resolution, `AGENTS.md` section structure, symbol-table presence, perch-decomposition keyword presence, etc. — see "Automated checks" below). The PR **cannot be assigned to a human reviewer until CI passes**.
+  2. **Human reviewer from `REVIEWERS.md`** (to be added; starts with the maintainer list) then approves before merge. The reviewer's job is specifically the things CI *cannot* check: economic correctness of the Bellman equation, correctness of the perch decomposition, defensibility of the YAML workarounds, whether `verification.md` actually compares to the published paper (versus merely claiming to), and quality of the model exposition.
+
+  Rationale: Formalized is the tier where content can be plausible-looking-but-wrong, and catching that needs a reviewer with DP background. Gating the human review behind CI ensures reviewer time is spent on judgment, not on finding missing files.
+
+### Automated checks (CI)
+
+A `.github/workflows/ballpark-check.yml` action (forthcoming in a follow-up PR) will run per-tier checks and post a status on the PR. **A contributor's checklist tick is not sufficient** at any tier — CI must also pass.
+
+Per-tier mechanical gates the CI will enforce:
+
+- **Draft:** directory path correct; `index.md` frontmatter present with required fields and `tier:` value in controlled set; `<citekey>_intro.ipynb` exists and contains citation / DOI / author; `references.bib` exists; paper `.pdf` committed or DOI pointer present.
+- **Primer** (additive): all four exposition notebooks exist; `_summary.ipynb` contains a **"The Model"** heading; `_prior-literature.ipynb` resolves **3–6** unique `{cite:t}` references against bib files; `self.bib` and `subsequent-literature.bib` exist; `<citekey>.mmd` exists or license-note present; `myst.yml` present and `myst build` succeeds; `index.md` `{include}`s all four notebooks; every `{cite:t}` resolves; every referenced figure exists.
+- **Formalized** (additive): `bellman-excerpt.md`, `bellman-excerpt-SMD-polished.md`, `dolo-plus-draft.yaml`, `verification.md`, `matsya-session.txt`, `AGENTS.md` all exist; `dolo-plus-draft.yaml` parses as YAML; `bellman-excerpt.md` contains a markdown table (heuristic: at least one pipe-delimited row with a Symbol column) and references all three perch names (`arrival`, `decision`, `continuation`); `AGENTS.md` contains the six required top-level sections (heading-based check).
+
+What CI does **not** check at Formalized (and therefore what the human reviewer is responsible for): the Bellman equation being correct, the perch decomposition being correct, the YAML workarounds being defensible, and `verification.md` genuinely comparing against the published paper.
+
+### Badges
+
+Each item's rendered page carries a tier badge (`Draft` / `Primer` / `Formalized`) at the top. Catalog cards show the badge so visitors can filter by tier (e.g. *"show me all Primer items that need promotion to Formalized"* — a natural call-to-contribute).
+
+The badge derives from the `tier:` frontmatter field; the MyST build pipeline renders it automatically. Contributors do not hand-insert badge markdown.
+
+### Effort calibration (for contributors and instructors)
+
+Effort is expressed in PhD-course-assignment units assuming AI-assisted workflow (Cursor + Claude + Matsya). These estimates are generous upper bounds:
+
+| Step | Upper bound |
+|------|-------------|
+| → Draft | 1 weekly assignment |
+| Draft → Primer | ≤ 2 weekly assignments |
+| Primer → Formalized | ≤ 2 weekly assignments |
+| Total from zero to Formalized | ≤ 5 weekly assignments |
+
+These estimates guide course-project scoping: a full semester leaves ample room for a student to take a paper all the way to Formalized and start on the replication step (which then belongs in REMARK, not here).
 
 ---
 
 ## Pre-merge checklist
 
-Before opening a PR, confirm:
+The target tier determines the checklist. Copy the target tier's qualifying checklist from the section above into your PR body and tick each box with a file-line citation. **In addition**, every PR (regardless of tier) must confirm:
 
-- [ ] `index.md` `{include}`s exactly the four exposition notebooks, in order.
+- [ ] `index.md` `{include}`s exactly the four exposition notebooks, in order (T2 and above).
 - [ ] `myst.yml` builds the item without errors (`myst build` in the item directory).
 - [ ] Every `{cite:t}` reference resolves against the bib files.
 - [ ] Every figure the notebooks reference exists and renders.
-- [ ] Paper PDF is either committed or replaced by a DOI pointer with a license note.
 - [ ] `_intro.ipynb` carries visible **Original ballpark author** and (if applicable) **Updated by** lines.
-- [ ] If the formalization layer is included: `AGENTS.md` is present; `dolo-plus-draft.yaml` flags all unresolved features with inline `# workaround:` / `# unresolved:` comments; and `verification.md` compares Matsya output to the published paper (not only the ballpark summary).
 - [ ] No `_build/`, UUID build directories, or `.slides.html` files are committed.
 
 ---
